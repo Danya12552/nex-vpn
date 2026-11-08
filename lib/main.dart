@@ -1,229 +1,257 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const NexVPN());
+  runApp(const DarkVirus());
 }
 
-class NexVPN extends StatelessWidget {
-  const NexVPN({super.key});
+class DarkVirus extends StatelessWidget {
+  const DarkVirus({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: const HomeScreen(),
+      home: const VirusScreen(),
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class VirusScreen extends StatefulWidget {
+  const VirusScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<VirusScreen> createState() => _VirusScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  bool connected = false;
-  String country = 'Germany';
+class _VirusScreenState extends State<VirusScreen> {
+  Timer? timer;
 
-  final servers = [
-    ['🇩🇪', 'Germany', '35 ms'],
-    ['🇳🇱', 'Netherlands', '42 ms'],
-    ['🇫🇮', 'Finland', '28 ms'],
-    ['🇸🇪', 'Sweden', '31 ms'],
-    ['🇺🇸', 'United States', '120 ms'],
-    ['🇫🇷', 'France', '39 ms'],
-    ['🇯🇵', 'Japan', '160 ms'],
-  ];
+  int progress = 0;
+  int countdown = 10;
+  String status = 'SYSTEM READY';
+  bool started = false;
+  bool finished = false;
+
+  void startPrank() {
+    timer?.cancel();
+
+    setState(() {
+      progress = 0;
+      countdown = 10;
+      started = true;
+      finished = false;
+      status = 'SIMULATED SCANNING...';
+    });
+
+    timer = Timer.periodic(
+      const Duration(milliseconds: 100),
+      (t) {
+        if (!mounted) return;
+
+        setState(() {
+          progress += 2;
+
+          if (progress >= 100) {
+            progress = 100;
+            t.cancel();
+            status = 'SIMULATION COMPLETE';
+            startCountdown();
+          }
+        });
+      },
+    );
+  }
+
+  void startCountdown() {
+    timer?.cancel();
+
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (t) {
+        if (!mounted) return;
+
+        setState(() {
+          countdown--;
+
+          if (countdown <= 0) {
+            t.cancel();
+            finished = true;
+            status = 'JUST A PRANK!';
+          }
+        });
+      },
+    );
+  }
+
+  void stopPrank() {
+    timer?.cancel();
+
+    setState(() {
+      started = false;
+      finished = false;
+      progress = 0;
+      status = 'SYSTEM READY';
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080D18),
+      backgroundColor: const Color(0xFF050505),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'NEX VPN',
-                    style: TextStyle(
-                      fontSize: 27,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 3,
-                    ),
-                  ),
-                  const Icon(
-                    Icons.bolt,
-                    color: Color(0xFF3185FF),
-                    size: 32,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 35),
-
-            Text(
-              connected ? 'CONNECTED' : 'PROTECTED BY NEX',
-              style: const TextStyle(
-                color: Colors.white70,
-                letterSpacing: 2,
-              ),
-            ),
-
-            const SizedBox(height: 35),
-
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  connected = !connected;
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: 190,
-                height: 190,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF111D31),
-                  border: Border.all(
-                    color: connected
-                        ? Colors.greenAccent
-                        : const Color(0xFF3185FF),
-                    width: 4,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: connected
-                          ? Colors.green.withOpacity(0.4)
-                          : Colors.blue.withOpacity(0.4),
-                      blurRadius: 45,
-                      spreadRadius: 5,
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  connected
-                      ? Icons.check
-                      : Icons.bolt,
-                  size: 95,
-                  color: connected
-                      ? Colors.greenAccent
-                      : Colors.blueAccent,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Text(
-              connected ? 'Demo mode' : 'Tap to connect',
-              style: const TextStyle(
-                color: Colors.white60,
-                fontSize: 16,
-              ),
-            ),
-
-            const SizedBox(height: 45),
-
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 22),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'SELECT LOCATION',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 15),
-
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                ),
-                itemCount: servers.length,
-                itemBuilder: (context, index) {
-                  final server = servers[index];
-                  final selected = country == server[1];
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        country = server[1];
-                      });
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(17),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF151E2D),
-                        borderRadius: BorderRadius.circular(17),
-                        border: Border.all(
-                          color: selected
-                              ? Colors.blueAccent
-                              : Colors.transparent,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            server[0],
-                            style: const TextStyle(fontSize: 25),
-                          ),
-                          const SizedBox(width: 15),
-                          Expanded(
-                            child: Text(
-                              server[1],
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ),
-                          Text(
-                            server[2],
-                            style: const TextStyle(
-                              color: Colors.greenAccent,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Icon(
-                            selected
-                                ? Icons.check_circle
-                                : Icons.circle_outlined,
-                            color: Colors.blueAccent,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const Padding(
-              padding: EdgeInsets.all(18),
-              child: Text(
-                'NEX VPN • PREMIUM SECURITY',
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'DARK VIRUS',
                 style: TextStyle(
-                  color: Colors.white38,
+                  fontSize: 34,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                  letterSpacing: 5,
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              const Text(
+                'HACKER SIMULATOR',
+                style: TextStyle(
+                  color: Colors.greenAccent,
+                  letterSpacing: 3,
+                ),
+              ),
+
+              const SizedBox(height: 45),
+
+              Icon(
+                finished
+                    ? Icons.sentiment_very_satisfied
+                    : Icons.warning_amber_rounded,
+                size: 100,
+                color: finished ? Colors.greenAccent : Colors.red,
+              ),
+
+              const SizedBox(height: 25),
+
+              Text(
+                finished
+                    ? 'YOU GOT PRANKED!'
+                    : status,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                  color: finished ? Colors.greenAccent : Colors.red,
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              if (started && !finished) ...[
+                Text(
+                  '$progress%',
+                  style: const TextStyle(
+                    fontSize: 38,
+                    color: Colors.greenAccent,
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                LinearProgressIndicator(
+                  value: progress / 100,
+                  minHeight: 12,
+                  backgroundColor: Colors.grey,
+                  color: Colors.red,
+                ),
+
+                const SizedBox(height: 30),
+
+                Text(
+                  'COUNTDOWN: $countdown',
+                  style: const TextStyle(
+                    fontSize: 25,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+
+              if (finished) ...[
+                const SizedBox(height: 25),
+                const Text(
+                  '😂😂😂\n\nЭТО БЫЛ РОЗЫГРЫШ!\n\nТВОЙ ТЕЛЕФОН В ПОРЯДКЕ!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.greenAccent,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 45),
+
+              if (!started)
+                ElevatedButton(
+                  onPressed: startPrank,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 18,
+                    ),
+                  ),
+                  child: const Text(
+                    'START PRANK',
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+              if (started)
+                ElevatedButton(
+                  onPressed: stopPrank,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 18,
+                    ),
+                  ),
+                  child: const Text(
+                    'STOP / EXIT',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+
+              const SizedBox(height: 30),
+
+              const Text(
+                'SAFE PRANK SIMULATION',
+                style: TextStyle(
+                  color: Colors.grey,
                   fontSize: 11,
                   letterSpacing: 2,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
